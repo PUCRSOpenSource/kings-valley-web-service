@@ -53,11 +53,16 @@ public class KingsValleyWS {
      */
     @WebMethod(operationName = "registraJogador")
     public synchronized int registraJogador(@WebParam(name = "nome") String nome) {
+        for (Jogador j : jogadores) {
+            if (j.getNome().equals(nome))
+                return -1;
+        }
+        
         Partida par = estaNoPreRegistro(nome);
         if(par != null){
             Jogador oponente;
             Jogador eu;
-            if(par.getJ1().getNome().equals(nome)){
+            if(par.getJ1() != null && par.getJ1().getNome().equals(nome)){
                oponente = par.getJ2();
                eu = par.getJ1();
             }else{
@@ -65,15 +70,20 @@ public class KingsValleyWS {
                eu = par.getJ2();
             }
             for (Partida p : partidas) {
-               if (p.getJ1().getNome().equals(oponente.getNome()) || p.getJ2().getNome().equals(oponente.getNome())) {
-                   eu.setCor(Cor.ESCURO);
-                   p.setJ2(eu);
+               if ((p.getJ1() != null && p.getJ1().getNome().equals(oponente.getNome())) || (p.getJ2() != null && p.getJ2().getNome().equals(oponente.getNome()))) {
+                   if (p.getJ1() == null) {
+                       eu.setCor(Cor.CLARO);
+                       p.setJ1(eu);
+                   } else {
+                       eu.setCor(Cor.ESCURO);
+                        p.setJ2(eu);
+                   }
                    p.setUltimaJogada(System.currentTimeMillis());
                    contadorIds++;
                    jogadores.add(eu);
                    return eu.getId();
                }
-           }
+            }
             for (Partida p : partidas) {
                if (p.getJ1() == null) {
                    eu.setCor(Cor.CLARO);
@@ -85,11 +95,7 @@ public class KingsValleyWS {
                }
            }
         }else{
-            
-           for (Jogador j : jogadores) {
-               if (j.getNome().equals(nome))
-                   return -1;
-           }
+           
            Jogador jogador = new Jogador(contadorIds, nome);
 
            for (Partida p : partidas) {
@@ -123,19 +129,23 @@ public class KingsValleyWS {
         while (partidaIterador.hasNext()) {
             Partida p = partidaIterador.next();
             if (p.getJ1() != null && p.getJ1().getId() == id) {
-                if (p.getJ2() != null)
-                    removeJogador(p.getJ2().getId());
-                removeJogador(id);
-                partidaIterador.remove();
-                partidas.add(new Partida());
+                if (p.decrementaContagemRegressivaParaAcabarComAPartida() == 0) {
+                    if (p.getJ2() != null)
+                        removeJogador(p.getJ2().getId());
+                    removeJogador(id);
+                    partidaIterador.remove();
+                    partidas.add(new Partida());
+                }
                 return 0;
             }
             if (p.getJ2() != null && p.getJ2().getId() == id) {
-                if (p.getJ1() != null)
-                    removeJogador(p.getJ1().getId());
-                removeJogador(id);
-                partidaIterador.remove();
-                partidas.add(new Partida());
+                if (p.decrementaContagemRegressivaParaAcabarComAPartida() == 0) {
+                    if (p.getJ1() != null)
+                        removeJogador(p.getJ1().getId());
+                    removeJogador(id);
+                    partidaIterador.remove();
+                    partidas.add(new Partida());
+                }
                 return 0;
             }
         }
@@ -243,7 +253,7 @@ public class KingsValleyWS {
     }
     
     private Partida estaNoPreRegistro(String nome){
-        for (Partida partida : partidas) {
+        for (Partida partida : preRegistro) {
             if((partida.getJ1() != null && partida.getJ1().getNome().equals(nome)) || (partida.getJ2() != null && partida.getJ2().getNome().equals(nome))){ 
                 return partida;
             }

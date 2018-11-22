@@ -26,11 +26,14 @@ public class KingsValleyWS_Client {
         port = service.getKingsValleyWSPort();
 
         executaTeste("KingsValley-0000",false);
-        executaTeste("KingsValley-0001",false);
+        executaTeste("KingsValley-3000",false);
+        
+//        executaTeste("KingsValley-0001",false);
+//        executaTeste("KingsValley-4750",false);
 
         
-        String[] testePar1 = {"KingsValley-2000","KingsValley-2250","KingsValley-2500","KingsValley-2750"};
-        executaTesteParalelo(testePar1);
+        //String[] testePar1 = {"KingsValley-2000","KingsValley-2250","KingsValley-2500","KingsValley-2750"};
+        //executaTesteParalelo(testePar1);
         
     }
     

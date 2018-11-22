@@ -10,12 +10,19 @@ public class Partida {
     private boolean wo;
     private Jogador vencedor;
     private long ultimaJogada;
+    private int contagemRegressivaParaAcabarComAPartida;
 
     public Partida() {
         tabuleiro = new Tabuleiro();
         vezJ1 = true;
         wo = false;
         encerrada = false;
+        contagemRegressivaParaAcabarComAPartida = 2;
+    }
+
+    public int decrementaContagemRegressivaParaAcabarComAPartida() {
+        contagemRegressivaParaAcabarComAPartida--;
+        return contagemRegressivaParaAcabarComAPartida;
     }
 
     public Jogador getJ1() {
@@ -96,7 +103,7 @@ public class Partida {
         if (j1 == null || j2 == null)
             return -2;
         if ((j1.getId() == idUsuario && !vezJ1) || (j2.getId() == idUsuario && vezJ1)) {
-            return -4;
+            return -3;
         }
         if (passouUmMinuto())
             return 2;
@@ -119,6 +126,16 @@ public class Partida {
                 vencedor = j2;
             }
             encerrada = true;
+            return;
         }
+
+        Cor campeao = tabuleiro.fimDeJogoPorJogadoresPresos(!vezJ1);
+        if (campeao == null) return;
+        if (campeao == Cor.CLARO) {
+            vencedor = j1;
+        } else {
+            vencedor = j2;
+        }
+        encerrada = true;
     }
 }

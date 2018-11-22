@@ -81,8 +81,11 @@ public class Tabuleiro {
 
     public int movePeca(Cor cor, int linha, int coluna, int direcao) {
         Direcao dir = Direcao.fromInteger(direcao);
-        if (tabuleiro[linha][coluna] == null || tabuleiro[linha][coluna].getCor() != cor || dir == null) {
-            return -3;
+        if (linha < 0 || coluna < 0 || linha >= size || coluna >= size || dir == null) {
+            return -4;
+        }
+        if (tabuleiro[linha][coluna] == null || tabuleiro[linha][coluna].getCor() != cor) {
+            return -5;
         }
         if (!direcaoValida(linha, coluna, dir))
             return 0;
@@ -178,5 +181,46 @@ public class Tabuleiro {
 
     public Peca getPecaMeio() {
         return tabuleiro[2][2];
+    }
+
+    public Cor fimDeJogoPorJogadoresPresos(boolean vezJ1) {
+        List<Peca> claras = new ArrayList<>();
+        List<Peca> escuras = new ArrayList<>();
+        for (Peca peca : pecas) {
+            if (peca.getCor() == Cor.CLARO)
+                claras.add(peca);
+            else
+                escuras.add(peca);
+        }
+        
+        
+        if (vezJ1) {
+            for (Peca clara : claras) {
+                if (pecaPodeSeMexer(clara))
+                    return null;
+            }
+            return Cor.ESCURO;
+        } else {
+            for (Peca escura : escuras) {
+                if (pecaPodeSeMexer(escura))
+                    return null;
+            }
+            return Cor.CLARO;
+        }
+    }
+    
+    private boolean pecaPodeSeMexer(Peca peca) {
+        int x = peca.getX();
+        int y = peca.getY();
+        int offsets[][] = {{-1, -1}, {-1, 0}, {-1, 1}, { 0, -1}, { 0, 1}, { 1, -1}, {-1, 0}, { 1, 1}};
+        for (int[] offset : offsets) {
+            int x_aux = offset[0] + x;
+            int y_aux = offset[1] + y;
+            if (x_aux < 0 || y_aux < 0 || x_aux >= size || y_aux >= size || tabuleiro[y_aux][x_aux] != null)
+                continue;
+            else
+                return true;
+        }
+        return false;
     }
 }
